@@ -23,7 +23,7 @@
                         <div class="departure_time">
                             {% for v in timetable.departures %}
                                 <div>
-                                    {{v.1}}m - {{ v.0 }}
+                                    {{v.1}} minut - {{ v.0 }}
                                 </div>
                             {% endfor %} 
                         </div>
@@ -31,10 +31,28 @@
                 
                 {% endfor %} 
             </div>
+            <div class="bike_header">Stacje rowerów miejskich</div>
+                <div class="bike_stations">
+                    <div class="bike_station_cell">Nazwa</div>
+                    <div class="bike_station_cell">Wolnych rowerów</div>
+                    <div class="bike_station_cell">Odległość</div>
+                    {% for b in bikes.response %}
+                        <div class="bike_station_cell">
+                            {{ b.name }}
+                        </div> 
+                        <div class="bike_station_cell">
+                            {{ b.free_bikes}}
+                        </div> 
+                        <div class="bike_station_cell">
+                            {{b.distance_to}}m
+                        </div>
+                    {% endfor %}
+                </div>
         </div>
 
     <div style="height:30px"></div>
     <a href="/" class="link">szukaj ponownie</a>
+
 
     </body>
 </html>

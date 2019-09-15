@@ -1,8 +1,8 @@
 from datetime import datetime
 from calendar import monthrange
 import json
-from UtilitiesAPIHandling import UtilitiesAPIHandling
-from TransportStops import TransportStops
+from .UtilitiesAPIHandling import UtilitiesAPIHandling
+from .TransportStops import TransportStops
 
 
 def weekday_to_number(weekday):
@@ -14,13 +14,13 @@ class TransportDepartures:
     def __init__(self):
         self.list_of_departures = []
         self.api_data = []
+        self.stops = None
 
-    def find_departures(self, query):
+    def find_applicable_stops(self, query):
         ts = TransportStops()
         ts.load_stop_data_from_api()
         ts.load_transport_stop_data()
-        self.stops = ts.find_stop_by_id(query)
-        self.get_api_data()
+        self.stops = ts.find_stops(query)
 
     def get_api_data(self):
         for stop in self.stops:
@@ -29,6 +29,8 @@ class TransportDepartures:
             self.api_data.append(data.get_json())
 
     def generate_departures_list(self):
+        self.get_api_data()
+
         for data in self.api_data:
             lines = data["routes"]
             # TODO change this so that it read the time from API

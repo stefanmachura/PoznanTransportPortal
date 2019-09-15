@@ -1,5 +1,5 @@
-from UtilitiesAPIHandling import UtilitiesAPIHandling
-from DistanceCalculator import DistanceCalculator
+from .UtilitiesAPIHandling import UtilitiesAPIHandling
+from .DistanceCalculator import DistanceCalculator
 import datetime
 
 
@@ -18,21 +18,30 @@ class TransportStops:
             self.error_message = "Could not load data from API"
             self.error_code = 1
 
-    def find_stop_by_id(self, query):
+    def find_stops(self, query):
         result = []
+        for stop in self.transportstops_data:
+            if query in stop['name']:
+                result.append(stop)
         for stop in self.transportstops_data:
             if query in stop['id']:
                 result.append(stop)
         return result
 
-    def find_stop_by_name(self, query):
-        result = []
+    def get_stop_location(self, stop_id):
+        # TODO: ogarnąć to
+        result = None
         for stop in self.transportstops_data:
-            if query in stop['name']:
-                result.append(stop)
-        return result
+            if stop['id'] == stop_id:
+                result = (stop['lat'], stop['lon'])
+        if result is not None:
+            return result
+        else:
+            return (0, 0)
 
     def load_transport_stop_data(self):
+        self.load_stop_data_from_api()
+
         for transportstops in self.transportstops_json.get_json()['features']:
             lat = transportstops['geometry']['coordinates'][0]
             lon = transportstops['geometry']['coordinates'][1]
