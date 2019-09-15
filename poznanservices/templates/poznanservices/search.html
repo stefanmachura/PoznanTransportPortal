@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% load static %}
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{% static "poznanservices/style.css" %}">
+    </head>
+    <body>
+        
+
+        <div class="wrapper">
+            <form action="/timetable/" method="get">
+                <div class="form_input">
+                    <input id="stop" type="text" name="stop" placeholder="SWLE41" class="searchform" autofocus>
+                </div>
+                <div class="form_submit">
+                    <input type="submit" value="szukaj" class="searchgo" id="go" disabled>
+                </div>
+            </form>
+            <div class="links_header">popularne</div>
+            <div class="quick_links">
+                <ul>
+                <li><a class="link" href="/timetable/?stop=FRRY">Fredry</a></li>
+                <li><a class="link" href="/timetable/?stop=POKA">Polanka</a></li>
+                <li><a class="link" href="/timetable/?stop=MRCI">Święty Marcin</a></li>
+                <li><a class="link" href="/timetable/?stop=NASE">Naramowicka/Serbska</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <script>
+        document.getElementById("stop").addEventListener("keyup", function() {
+        var nameInput = document.getElementById('stop').value;
+        if (nameInput != "") {
+            document.getElementById('go').removeAttribute("disabled");
+            document.getElementById('go').style.backgroundColor = "#006a4e";
+        } else {
+            document.getElementById('go').setAttribute("disabled", null);
+            document.getElementById('go').style.backgroundColor = "#006a4e3d";
+        }
+        });
+        </script>
+    </body>
+</html>
