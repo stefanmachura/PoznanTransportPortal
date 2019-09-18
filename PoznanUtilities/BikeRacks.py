@@ -2,6 +2,9 @@ from datetime import datetime
 from .DistanceCalculator import DistanceCalculator
 from .UtilitiesAPIHandling import UtilitiesAPIHandling
 
+# TODO: przepisać od zera
+# TODO: unittesty
+
 
 class BikeRack:
     def __init__(self, lat, lon, name, free_bikes):
