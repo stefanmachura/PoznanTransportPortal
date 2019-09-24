@@ -3,4 +3,3 @@ datetime
 gunicorn
 django-heroku
 requests
-json
