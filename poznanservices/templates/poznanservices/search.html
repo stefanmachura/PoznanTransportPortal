@@ -13,18 +13,32 @@
         <link rel="stylesheet" href="{% static "poznanservices/style.css" %}">
     </head>
     <body>
-        
-
         <div class="wrapper">
-            <form action="/timetable/" method="get">
+            <form action="" method="post">
+                {% csrf_token %}
                 <div class="form_input">
-                    <input id="stop" type="text" name="stop" placeholder="SWLE41" class="searchform" autofocus>
+                    <input id="stop" type="text" name="stop" class="searchform" autofocus>
                 </div>
                 <div class="form_submit">
                     <input type="submit" value="szukaj" class="searchgo" id="go" disabled>
                 </div>
             </form>
-            <div class="links_header">popularne</div>
+            {% if error %}
+            <div class="error_message">
+                {{error}}
+            </div>
+            {% endif %}
+            {% if q %}
+            <div class="search_results">
+                {% for stop in q %}
+                    <div class="search_single_result">
+                        <a href="timetable/?stop={{stop.family}}">{{stop.name}}</a>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- <div class="links_header">popularne</div>
             <div class="quick_links">
                 <ul>
                 <li><a class="link" href="/timetable/?stop=FRRY">Fredry</a></li>
@@ -32,7 +46,7 @@
                 <li><a class="link" href="/timetable/?stop=MRCI">Święty Marcin</a></li>
                 <li><a class="link" href="/timetable/?stop=NASE">Naramowicka/Serbska</a></li>
                 </ul>
-            </div>
+            </div> -->
         </div>
 
 

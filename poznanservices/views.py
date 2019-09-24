@@ -6,7 +6,16 @@ from PoznanUtilities import BikeRacks
 
 
 def search(request):
-        return render(request, 'poznanservices/search.html', {})
+        if 'stop' not in request.POST:
+            return render(request, 'poznanservices/search.html', {})
+        else:
+            ts = TransportStops.TransportStops()
+            ts.load_transport_stop_data()
+            result = ts.search_for_stops(request.POST['stop'], merging=True)
+            if not result:
+                return render(request, 'poznanservices/search.html', {"error": "Nie znaleziono przystanku"})
+            else:
+                return render(request, 'poznanservices/search.html', {"q": result})
 
 
 def timetable(request):
@@ -18,8 +27,8 @@ def timetable(request):
 
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        location = ts.get_stop_location(stop)
-        print(location)
+        sss = ts.search_for_stops(stop)
+        location = ts.get_stop_location(sss)
 
         br = BikeRacks.BikeRacks()
         br.find_bikerack_distances(location)
@@ -38,8 +47,9 @@ def timetable(request):
             unique_destination_timetable["desc"] = unique_destination
             unique_destination_timetable["departures"] = []
             for departure in list_of_departures:
-                if departure['line'] == unique_destination[0] and departure['headsign'] == unique_destination[1] and departure['tud'] < 800 and departure['tud'] > 0:
+                if departure['line'] == unique_destination[0] and departure['headsign'] == unique_destination[1] and (0 < departure['tud'] < 60):
                     unique_destination_timetable["departures"].append((departure['departure_time'], departure['tud']))
+            del unique_destination_timetable["departures"][5:]
             if len(unique_destination_timetable["departures"]) > 0:
                 lines_timetables.append(unique_destination_timetable)
 
