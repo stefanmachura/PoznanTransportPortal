@@ -18,7 +18,7 @@ class TransportStops:
             self.error_message = "Could not load data from API"
             self.error_code = 1
 
-    def search_for_stops(self, query, merging=True):
+    def search_for_stops_by_query(self, query, merging=True):
         result = []
         known_families = []
         for stop in self.transportstops_data:
@@ -31,13 +31,10 @@ class TransportStops:
                         known_families.append(stop['family'])
         return result
 
-    def find_stops(self, query):
+    def search_for_stops_by_family(self, family):
         result = []
         for stop in self.transportstops_data:
-            if query.lower() in stop['name'].lower():
-                result.append(stop)
-        for stop in self.transportstops_data:
-            if query.lower() in stop['id'].lower():
+            if family.lower() in stop['family'].lower():
                 result.append(stop)
         return result
 

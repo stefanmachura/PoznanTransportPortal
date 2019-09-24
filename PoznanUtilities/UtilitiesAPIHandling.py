@@ -64,14 +64,10 @@ class UtilitiesAPIHandling:
         self.service_api_json = r.json()
         log_event(self.desc + " was read from online API")
 
-    def load_json_from_either_api_or_file(self, max_age=300):
+    def load_json_from_either_api_or_file(self, max_age=30):
         log_event(self.desc + " request logged, the file is " + str(self.get_file_age()) + " seconds old")
         if self.get_file_age() in range(0, max_age):
             self.read_json_from_file()
         else:
             self.download_json_from_api()
             self.save_json_to_file()
-
-
-class TestServiceAPIJSON(unittest.TestCase):
-    pass

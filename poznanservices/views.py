@@ -11,7 +11,7 @@ def search(request):
         else:
             ts = TransportStops.TransportStops()
             ts.load_transport_stop_data()
-            result = ts.search_for_stops(request.POST['stop'], merging=True)
+            result = ts.search_for_stops_by_query(request.POST['stop'], merging=True)
             if not result:
                 return render(request, 'poznanservices/search.html', {"error": "Nie znaleziono przystanku"})
             else:
@@ -20,15 +20,17 @@ def search(request):
 
 def timetable(request):
         stop = request.GET.get('stop')
-        td = TransportDepartures.TransportDepartures()
-        td.find_applicable_stops(stop)
-        td.generate_departures_list()
-        list_of_departures = td.get_list_of_departures()
 
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        sss = ts.search_for_stops(stop)
+        sss = ts.search_for_stops_by_family(stop)
         location = ts.get_stop_location(sss)
+        print(sss)
+
+        td = TransportDepartures.TransportDepartures()
+        td.load_stops(sss)
+        td.generate_departures_list()
+        list_of_departures = td.get_list_of_departures()
 
         br = BikeRacks.BikeRacks()
         br.find_bikerack_distances(location)

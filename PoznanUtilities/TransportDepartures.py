@@ -16,10 +16,8 @@ class TransportDepartures:
         self.api_data = []
         self.stops = None
 
-    def find_applicable_stops(self, query):
-        ts = TransportStops()
-        ts.load_transport_stop_data()
-        self.stops = ts.find_stops(query)
+    def load_stops(self, stops):
+        self.stops = stops
 
     def get_api_data(self):
         for stop in self.stops:
