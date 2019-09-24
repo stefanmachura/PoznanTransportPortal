@@ -1,2 +1,4 @@
 haversine
 datetime
+gunicorn
+django-heroku
