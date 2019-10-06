@@ -17,36 +17,37 @@ class TestStops(unittest.TestCase):
     def test_searching_for_stop_with_exact_id(self):
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        x = ts.find_stops("FRRY41")
+        x = ts.search_for_stops_by_query("FRRY41", merging=False)
         self.assertEqual(len(x), 1)
 
     def test_searching_for_stop_with_blurry_id(self):
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        x = ts.find_stops("FRRY")
+        x = ts.search_for_stops_by_query("FRRY", merging=False)
         self.assertEqual(len(x), 2)
 
     def test_searching_for_nonexisting_id(self):
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        x = ts.find_stops("LOL22")
+        x = ts.search_for_stops_by_query("LOL22")
         self.assertEqual(len(x), 0)
 
     def test_searching_for_stop_with_good_name(self):
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        x = ts.find_stops("Fredry")
+        x = ts.search_for_stops_by_query("Fredry", merging=False)
         self.assertEqual(len(x), 2)
 
     def test_searching_for_stop_with_wrong_name(self):
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        x = ts.find_stops("LOL")
+        x = ts.search_for_stops_by_query("LOL")
         self.assertEqual(len(x), 0)
 
     def test_finding_location(self):
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
-        location = ts.get_stop_location("AWF41")
+        x = ts.search_for_stops_by_query("AWF41", merging=False)
+        location = ts.get_stop_location(x)
         awf_location = (16.9343, 52.39924)
         self.assertTupleEqual(location, awf_location)

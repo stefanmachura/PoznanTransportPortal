@@ -8,5 +8,6 @@ local_settings.py
 db.sqlite3
 
 *.txt
+!requirements.txt
 
 .vscode
