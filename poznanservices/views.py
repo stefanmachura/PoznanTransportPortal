@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from PoznanUtilities import TransportDepartures
 from PoznanUtilities import TransportStops
 from PoznanUtilities import BikeRacks
+import os
 
 
 def search(request):
@@ -57,3 +58,14 @@ def timetable(request):
 
         lines_timetables = sorted(lines_timetables, key=lambda k: k['desc'][0])
         return render(request, 'poznanservices/timetable.html', {'timetables': lines_timetables, 'bikes': bikes})
+
+
+def show_logs(request):
+    files = os.listdir('PoznanUtilitiesData')
+    return render(request, 'poznanservices/logs.html', {'files': files})
+
+
+def show_single_log(request, fname):
+    with open('PoznanUtilitiesData\\' + fname, "r") as log_file:
+        log = log_file.read()
+    return HttpResponse(log.replace('\n', '<br/>'))
