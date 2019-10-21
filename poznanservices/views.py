@@ -5,14 +5,21 @@ from PoznanUtilities import TransportStops
 from PoznanUtilities import BikeRacks
 import os
 
+from stops.models import Stop
+
 
 def search(request):
         if 'stop' not in request.POST:
             return render(request, 'poznanservices/search.html', {})
         else:
-            ts = TransportStops.TransportStops()
-            ts.load_transport_stop_data()
-            result = ts.search_for_stops_by_query(request.POST['stop'], merging=True)
+            # ts = TransportStops.TransportStops()
+            # ts.load_transport_stop_data()
+            # result = ts.search_for_stops_by_query(request.POST['stop'], merging=True)
+
+            ts = Stop()
+            result = ts.find_by_name_or_id(request.POST['stop'], True)
+
+
             if not result:
                 return render(request, 'poznanservices/search.html', {"error": "Nie znaleziono przystanku"})
             else:
@@ -22,10 +29,13 @@ def search(request):
 def timetable(request):
         stop = request.GET.get('stop')
 
+
+        ss = Stop()
+        location = ss.get_location_of_stop_family(stop)
+
         ts = TransportStops.TransportStops()
         ts.load_transport_stop_data()
         sss = ts.search_for_stops_by_family(stop)
-        location = ts.get_stop_location(sss)
 
         td = TransportDepartures.TransportDepartures()
         td.load_stops(sss)
