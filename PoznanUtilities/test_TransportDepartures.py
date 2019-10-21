@@ -31,4 +31,4 @@ class TestDepartures(unittest.TestCase):
         td.load_stops(x)
         td.get_api_data()
         td.generate_departures_list()
-        self.assertTrue(td.get_list_of_departures)
+        self.assertTrue(td.get_list_of_departures())

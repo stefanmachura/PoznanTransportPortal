@@ -15,6 +15,8 @@ class TransportDepartures:
         self.list_of_departures = []
         self.api_data = []
         self.stops = None
+        self.error_code = 0
+        self.error_message = ""
 
     def load_stops(self, stops):
         self.stops = stops
@@ -23,6 +25,8 @@ class TransportDepartures:
         for stop in self.stops:
             url = "http://www.poznan.pl/mim/komunikacja/service.html?stop_id=" + stop['id']
             data = UtilitiesAPIHandling(stop['id'], url)
+            if len(data.get_json()["routes"]) == 0:
+                self.error_code = 1
             self.api_data.append(data.get_json())
 
     def generate_departures_list(self):
