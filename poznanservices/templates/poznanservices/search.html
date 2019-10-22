@@ -29,13 +29,13 @@
             </div>
             {% endif %}
             {% if q %}
-            <div class="search_results">
-                {% for stop in q %}
-                    <div class="search_single_result">
-                        <a href="timetable/?stop={{stop.family}}">{{stop.name}}</a>
-                    </div>
-                {% endfor %}
-            </div>
+                <div class="search_results">
+                    {% for stop in q %}
+                        <div class="search_single_result">
+                            <a href="timetable/?stop={{stop.family}}">{{stop.name}}</a>
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
             
             <!-- <div class="links_header">popularne</div>

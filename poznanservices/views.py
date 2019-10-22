@@ -1,25 +1,34 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from PoznanUtilities import TransportDepartures
-from PoznanUtilities import TransportStops
-from PoznanUtilities import BikeRacks
+
 import os
+import requests
+import datetime
+import json
 
 from stops.models import Stop
+from bikes.models import BikeRack
+
+def create_departures_list(request):
+    urls = []
+    data = []
+    ss = Stop()
+    stops = ss.find_by_name_or_id("Rataje")
+    for stop in stops:
+        urls.append("http://www.poznan.pl/mim/komunikacja/service.html?stop_id=" + stop.given_id + "<br/>")
+        url = "http://www.poznan.pl/mim/komunikacja/service.html?stop_id=" + stop.given_id
+        r = requests.get(url)
+        r.encoding = 'utf-8'
+        data.append(r.json())
+    return HttpResponse(data)
 
 
 def search(request):
         if 'stop' not in request.POST:
             return render(request, 'poznanservices/search.html', {})
         else:
-            # ts = TransportStops.TransportStops()
-            # ts.load_transport_stop_data()
-            # result = ts.search_for_stops_by_query(request.POST['stop'], merging=True)
-
             ts = Stop()
             result = ts.find_by_name_or_id(request.POST['stop'], True)
-
-
             if not result:
                 return render(request, 'poznanservices/search.html', {"error": "Nie znaleziono przystanku"})
             else:
@@ -27,61 +36,59 @@ def search(request):
 
 
 def timetable(request):
-        stop = request.GET.get('stop')
+    stop = request.GET.get('stop')
 
+    # TODO: errors for bike system and stops system
+    # TODO: unit tests for error system
+        
+    stops = Stop()
+    sss = stops.find_by_family(stop)
 
-        ss = Stop()
-        location = ss.get_location_of_stop_family(stop)
+    td = TransportDepartures.TransportDepartures()
+    td.load_stops(sss)
+    td.generate_departures_list()
+    list_of_departures = td.get_list_of_departures()
 
-        ts = TransportStops.TransportStops()
-        ts.load_transport_stop_data()
-        sss = ts.search_for_stops_by_family(stop)
+    br = BikeRack()
+    bikes = br.find_nearest((17, 52))
 
-        td = TransportDepartures.TransportDepartures()
-        td.load_stops(sss)
-        td.generate_departures_list()
-        list_of_departures = td.get_list_of_departures()
+    if td.error_code == 1:
+        error_message = "System ZTM nie zwrócił żadnych danych, spróbuj ponownie za jakiś czas"
+        return render(request, 'poznanservices/timetable.html', {'error_message': error_message, 'bikes': bikes})
+    else:
+        return render(request, 'poznanservices/timetable.html', {'timetables': list_of_departures, 'error': error_message, 'bikes': bikes})
 
-        br = BikeRacks.BikeRacks()
-        br.find_bikerack_distances(location)
-        br.sort_bikeracks_by_distance()
-        bikes = br.get_racks_data_as_dict(5)
-        # TODO: errors for bike system and stops system
-        # TODO: unit tests for error system
+def mock(request):
+    destinations = []
+    some_time_ago =  datetime.datetime.strptime("24.09.2019 - 00:00", "%d.%m.%Y - %H:%M")
 
-        if td.error_code == 1:
-            error_message = "System ZTM nie zwrócił żadnych danych, spróbuj ponownie za jakiś czas"
-            return render(request, 'poznanservices/timetable.html', {'error_message': error_message, 'bikes': bikes})
-            
-        else:
-            unique_destinations = []
-            lines_timetables = []
+    with open("WOPO01_JSON.txt", "r") as json_file:
+        data = json.load(json_file)
+        today = data['date'].split(", ") # splitting the date provided in the api to Polish weekday name and the proper date that can be parsed
+        for route in data['routes']:
+            name = route['name']
+            variants = route['variants']
+            for variant in variants:
+                headsign = variant['headsign']
+                for service in variant['services']:
+                    when = service['when']
+                    departures = []                    
+                    for departure in service['departures']:
+                        hour = departure['hours']
+                        if len(hour) == 1: # hours in the api response are not zero-padded :(
+                            hour = "0" + hour
 
-            for departure in list_of_departures:
-                if not (departure['line'], departure['headsign']) in unique_destinations:
-                    unique_destinations.append((departure['line'], departure['headsign']))
+                        # generating a datetime object with time and date of departure
+                        time = today[1] + " - " + hour + ":" + departure['minutes']
+                        timestamp = datetime.datetime.strptime(time, "%d.%m.%Y - %H:%M")
 
-            for unique_destination in unique_destinations:
-                unique_destination_timetable = {}
-                unique_destination_timetable["desc"] = unique_destination
-                unique_destination_timetable["departures"] = []
-                for departure in list_of_departures:
-                    if departure['line'] == unique_destination[0] and departure['headsign'] == unique_destination[1] and (0 < departure['tud'] < 60):
-                        unique_destination_timetable["departures"].append((departure['departure_time'], departure['tud']))
-                del unique_destination_timetable["departures"][5:]
-                if len(unique_destination_timetable["departures"]) > 0:
-                    lines_timetables.append(unique_destination_timetable)
-            lines_timetables = sorted(lines_timetables, key=lambda k: k['desc'][0])
-            return render(request, 'poznanservices/timetable.html', {'timetables': lines_timetables, 'error': error_message, 'bikes': bikes})
+                        if today[0] != when: # this is when a part of the timetable goes past midnight to the next day
+                            timestamp += datetime.timedelta(days=1)
+                        delta = timestamp - some_time_ago 
+                        departures.append({'time': timestamp, 'desc': departure['trip_desc'], 'delta': int(delta.total_seconds() / 60)})
+                        departures = sorted(departures, key=lambda k: k['delta'])
+                destinations.append({'name': name, 'headsign': headsign, 'departures': departures[0:10]})
 
-
-
-def show_logs(request):
-    files = os.listdir('PoznanUtilitiesData')
-    return render(request, 'poznanservices/logs.html', {'files': files})
-
-
-def show_single_log(request, fname):
-    with open('PoznanUtilitiesData\\' + fname, "r") as log_file:
-        log = log_file.read()
-    return HttpResponse(log.replace('\n', '<br/>'))
+    br = BikeRack()
+    bikes = br.find_nearest((17, 52))
+    return render(request, 'poznanservices/timetable.html', {'timetables': destinations, 'error': None, 'bikes': bikes})
