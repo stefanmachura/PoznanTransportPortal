@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'poznanservices',
     'stops',
-    'bikes'
+    'bikes',
+    'departures'
 ]
 
 MIDDLEWARE = [

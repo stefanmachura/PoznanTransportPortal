@@ -12,7 +12,7 @@ class BikeRack(models.Model):
     longitude = models.CharField(max_length=20)
     latitude = models.CharField(max_length=20)
     updated = models.DateTimeField(auto_now_add=True)
-    updated.editable = True
+    # updated.editable = True
     objects = models.Manager()
 
     class Meta:

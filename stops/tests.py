@@ -1,6 +1,7 @@
 from django.test import TestCase
 from .models import Stop
 
+
 class StopModelTests(TestCase):
 
     def test_api_connect(self):
@@ -26,7 +27,7 @@ class StopModelTests(TestCase):
                             name="Fredry2",
                             given_id="FRRY61",
                             family="FRRY",
-                            lines="1,2,3,4,5")                   
+                            lines="1,2,3,4,5")
         x = Stop()
         result = x.find_by_family("FRRY")
         self.assertEqual(len(result), 2)
@@ -43,8 +44,7 @@ class StopModelTests(TestCase):
                             name="x",
                             given_id="FRRY61",
                             family="FRRY",
-                            lines="1,2,3,4,5")                   
+                            lines="1,2,3,4,5")
         x = Stop()
         result = x.find_by_name_or_id("ry")
         self.assertEqual(len(result), 2)
-    

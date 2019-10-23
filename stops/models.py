@@ -3,6 +3,7 @@ from django.db.models import Q
 
 import requests
 
+
 class Stop(models.Model):
     latitude = models.CharField(max_length=20)
     longitude = models.CharField(max_length=20)
@@ -14,7 +15,7 @@ class Stop(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.given_id}"
 
     def len(self):
         return Stop.objects.all().count()
@@ -22,7 +23,7 @@ class Stop(models.Model):
     def connect(self):
         url = "http://www.poznan.pl/mim/plan/map_service.html?mtype=pub_transport&co=cluster"
         return requests.get(url)
-    
+
     def get_api_json(self):
         api_data = self.connect()
         return api_data.json()
@@ -30,7 +31,7 @@ class Stop(models.Model):
     def find_by_family(self, query):
         result = Stop.objects.filter(family__exact=query.upper())
         return result
-    
+
     def find_by_name_or_id(self, query, distinct=False):
         result = Stop.objects.filter(Q(name__icontains=query) | Q(given_id__icontains=query))
         # a not-so-nice way to simulate SQL distinct keyword on single column
