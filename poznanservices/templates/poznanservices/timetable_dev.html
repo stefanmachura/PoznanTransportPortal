@@ -10,25 +10,16 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{% static "poznanservices/style.css" %}">
+        {% comment %} <link rel="stylesheet" href="{% static "poznanservices/style.css" %}"> {% endcomment %}
     </head>
     <body>
         <div class="wrapper">       
-            {% if not error_message %} 
-            <div class="departures_header">{{name}}</div> 
-            <div class="departures">
+            {% if not error_message %}  
+            <div class="timetables">
                 {% for departure in departures %}
-                <div class="departure">
-                    <div class="departure_line">
-                        {{ departure.line }}
-                    </div>
-                    <div class="departure_info">
-                        {{ departure.headsign}}
-                    </div>
-                    <div class="departure_time">    
-                        {{departure.timestamp|date:'H:i'}}
-                    </div>
-                </div>
+
+                    {{departure.line}} - {{departure.headsign}} {{departure.timestamp|date:'d - H:i'}} - {{departure.stop.given_id}}<br/>
+
                 {% endfor %} 
             </div>
             {% else %}
@@ -36,7 +27,7 @@
                     {{ error_message }}
                 </div>
             {% endif %}
-            <div class="bikes_header">Stacje rowerów miejskich</div>
+            <div class="bike_header">Stacje rowerów miejskich</div>
                 <div class="bike_stations">
                     <div class="bike_station_cell">Nazwa</div>
                     <div class="bike_station_cell">Wolnych rowerów</div>

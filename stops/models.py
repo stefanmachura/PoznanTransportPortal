@@ -4,6 +4,24 @@ from django.db.models import Q
 import requests
 
 
+class StopManager(models.Manager):
+
+    def find_by_family(self, query):
+        result = Stop.objects.filter(family__exact=query.upper())
+        return result
+
+    def get_location_of_stop_family(self, query):
+        stops = Stop.objects.find_by_family(query)
+        lats = []
+        lons = []
+        for stop in stops:
+            lats.append(float(stop.latitude))
+            lons.append(float(stop.longitude))
+        lat = sum(lats) / len(lats)
+        lon = sum(lons) / len(lons)
+        return (lat, lon)
+
+
 class Stop(models.Model):
     latitude = models.CharField(max_length=20)
     longitude = models.CharField(max_length=20)
@@ -12,7 +30,7 @@ class Stop(models.Model):
     family = models.CharField(max_length=20)
     lines = models.CharField(max_length=50)
 
-    objects = models.Manager()
+    objects = StopManager()
 
     def __str__(self):
         return f"{self.name} - {self.given_id}"
@@ -27,10 +45,6 @@ class Stop(models.Model):
     def get_api_json(self):
         api_data = self.connect()
         return api_data.json()
-
-    def find_by_family(self, query):
-        result = Stop.objects.filter(family__exact=query.upper())
-        return result
 
     def find_by_name_or_id(self, query, distinct=False):
         result = Stop.objects.filter(Q(name__icontains=query) | Q(given_id__icontains=query))
@@ -47,17 +61,6 @@ class Stop(models.Model):
             return distinct_result
         else:
             return result
-
-    def get_location_of_stop_family(self, query):
-        stops = self.find_by_family(query)
-        lats = []
-        lons = []
-        for stop in stops:
-            lats.append(float(stop.latitude))
-            lons.append(float(stop.longitude))
-        lat = sum(lats) / len(lats)
-        lon = sum(lons) / len(lons)
-        return (lat, lon)
 
     def populate_db(self, how_many=0):
         api_data = self.connect()

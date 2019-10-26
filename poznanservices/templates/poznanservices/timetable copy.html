@@ -14,21 +14,22 @@
     </head>
     <body>
         <div class="wrapper">       
-            {% if not error_message %} 
-            <div class="departures_header">{{name}}</div> 
-            <div class="departures">
-                {% for departure in departures %}
-                <div class="departure">
-                    <div class="departure_line">
-                        {{ departure.line }}
-                    </div>
-                    <div class="departure_info">
-                        {{ departure.headsign}}
-                    </div>
-                    <div class="departure_time">    
-                        {{departure.timestamp|date:'H:i'}}
-                    </div>
+            {% if not error_message %}  
+            <div class="timetables">
+                {% for timetable in timetables %}
+                <div class="timetable">
+                        <div class="tram_number">
+                            {{ timetable.name }} <span class="heading"> {{ timetable.headsign|truncatechars:12 }} </span>
+                        </div>
+                        <div class="departure_time">
+                            {% for v in timetable.departures %}
+                                <div>
+                                    {{v.time|date:"H:i"}} - {{ v.delta }}m
+                                </div>
+                            {% endfor %} 
+                        </div>
                 </div>
+                
                 {% endfor %} 
             </div>
             {% else %}
@@ -36,7 +37,7 @@
                     {{ error_message }}
                 </div>
             {% endif %}
-            <div class="bikes_header">Stacje rowerów miejskich</div>
+            <div class="bike_header">Stacje rowerów miejskich</div>
                 <div class="bike_stations">
                     <div class="bike_station_cell">Nazwa</div>
                     <div class="bike_station_cell">Wolnych rowerów</div>
