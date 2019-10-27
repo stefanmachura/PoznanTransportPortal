@@ -60,10 +60,10 @@ class StopManager(models.Manager):
 class Stop(models.Model):
     latitude = models.CharField(max_length=20)
     longitude = models.CharField(max_length=20)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=150)
     given_id = models.CharField(max_length=20)
     family = models.CharField(max_length=20)
-    lines = models.CharField(max_length=50)
+    lines = models.CharField(max_length=80)
 
     objects = StopManager()
 
