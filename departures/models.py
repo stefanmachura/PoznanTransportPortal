@@ -31,6 +31,10 @@ class DepartureManager(models.Manager):
                         time = today[1] + " - " + hour + ":" + departure['minutes']
                         timestamp = datetime.datetime.strptime(time, "%d.%m.%Y - %H:%M")
 
+                        # when the timetable goes over midnight, the 'when' in API changes to next day, and we need to add a day to the departure timestamp
+                        if today != when:
+                            timestamp += datetime.timedelta(days=1)
+
                         # making the timestamp tz aware so that timedelta can be calculated
                         local_timezone = pytz.timezone('Europe/Warsaw')
                         timestamp = local_timezone.localize(timestamp)

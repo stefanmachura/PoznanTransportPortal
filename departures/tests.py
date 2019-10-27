@@ -37,7 +37,7 @@ class TestDepartureModel(TestCase):
 
         test_line4 = '1'
         test_headsign4 = 'Starołęka'
-        test_timestamp4 = datetime.datetime.strptime("26.10.2019 - 18:50", "%d.%m.%Y - %H:%M")
+        test_timestamp4 = datetime.datetime.strptime("29.10.2019 - 18:50", "%d.%m.%Y - %H:%M")
         test_timestamp4 = local_timezone.localize(test_timestamp4)
         test_tram_stop4 = Stop.objects.create(latitude='52.3', longitude='16.1', name='Testowo', given_id='TEST43', family='TEST2', lines='2,4,9')
 

@@ -10,8 +10,7 @@ def search(request):
     if 'stop' not in request.POST:
         return render(request, 'poznanservices/search.html', {})
     else:
-        ts = Stop()
-        result = ts.find_by_name_or_id(request.POST['stop'], True)
+        result = Stop.objects.find_by_name_or_id(request.POST['stop'], True)
         if not result:
             return render(request, 'poznanservices/search.html', {"error": "Nie znaleziono przystanku"})
         else:
@@ -23,7 +22,6 @@ def timetable(request):
 
     # TODO: errors for bike system and stops system
     # TODO: code cleanup
-    # TODO: unit tests
     # TODO: prepare mock content
     # TODO: Error handling
     # TODO: db cleaning of old departures
@@ -33,7 +31,7 @@ def timetable(request):
 
     location = Stop.objects.get_location_of_stop_family(stop_of_departures)
 
-    br = BikeRack()
-    bikes = br.find_nearest(location)
+    BikeRack.objects.update_all()
+    bikes = BikeRack.objects.find_nearest(location)
 
     return render(request, 'poznanservices/timetable.html', {'departures': departures[:10], 'error_message': error_message, 'bikes': bikes, 'name': family_name.name})

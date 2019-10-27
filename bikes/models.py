@@ -1,31 +1,16 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 import requests
 import datetime
 import pytz
 from haversine import haversine
 
-class BikeRack(models.Model):
-    api_id = models.IntegerField(default=0)
-    free_bikes = models.IntegerField(default=0)
-    free_racks = models.IntegerField(default=0)
-    name = models.CharField(max_length=20)
-    longitude = models.CharField(max_length=20)
-    latitude = models.CharField(max_length=20)
-    updated = models.DateTimeField(auto_now_add=True)
-    # updated.editable = True
-    objects = models.Manager()
 
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-
+class BikeRackManager(models.Manager):
     def connect(self):
         url = "http://www.poznan.pl/mim/plan/map_service.html?mtype=pub_transport&co=stacje_rowerowe"
         return requests.get(url)
-    
+
     def get_api_json(self):
         api_data = self.connect()
         return api_data.json()
@@ -36,15 +21,13 @@ class BikeRack(models.Model):
         for bike_rack in api_data['features']:
             time = datetime.datetime.strptime(bike_rack['properties']['updated'], "%Y-%m-%d %H:%M")
             result.append({'api_id': bike_rack['id'],
-            'free_racks': bike_rack['properties']['free_racks'],
-            'free_bikes': bike_rack['properties']['bikes'],
-            'name': bike_rack['properties']['label'],
-            'longitude': bike_rack['geometry']['coordinates'][0],
-            'latitude':bike_rack['geometry']['coordinates'][1],
-            'updated': time
-            })
+                           'free_racks': bike_rack['properties']['free_racks'],
+                           'free_bikes': bike_rack['properties']['bikes'],
+                           'name': bike_rack['properties']['label'],
+                           'longitude': bike_rack['geometry']['coordinates'][0],
+                           'latitude': bike_rack['geometry']['coordinates'][1],
+                           'updated': time})
         return result
-
 
     def populate(self):
         data = self.get_api_json()
@@ -61,19 +44,6 @@ class BikeRack(models.Model):
             new_br.save()
         return "OK"
 
-    def update(self):
-        fresh_data = self.get_data_from_api()
-        tz = pytz.timezone('Europe/Warsaw')
-        # I know one should never store timezone aware times, but this app is written specifically for one specific city, so we should be ok
-        for fd in fresh_data:
-            try:
-                my_rack = BikeRack.objects.get(api_id=fd['api_id'])
-                my_rack.free_bikes = fd['free_bikes']
-                my_rack.updated = datetime.datetime.now(tz)
-                my_rack.save()
-            except:
-                continue
-
     def find_nearest(self, user_location):
         located = []
         results = BikeRack.objects.all()
@@ -86,3 +56,31 @@ class BikeRack(models.Model):
         located.sort(key=lambda x: x['distance_to'])
         return located[:5]
 
+    def update_all(self):
+        fresh_data = self.get_data_from_api()
+        tz = pytz.timezone('Europe/Warsaw')
+        for fd in fresh_data:
+            try:
+                my_rack = BikeRack.objects.get(api_id=fd['api_id'])
+                my_rack.free_bikes = fd['free_bikes']
+                my_rack.updated = datetime.datetime.now(tz)
+                my_rack.save()
+            except ObjectDoesNotExist:
+                continue
+
+
+class BikeRack(models.Model):
+    api_id = models.IntegerField(default=0)
+    free_bikes = models.IntegerField(default=0)
+    free_racks = models.IntegerField(default=0)
+    name = models.CharField(max_length=20)
+    longitude = models.CharField(max_length=20)
+    latitude = models.CharField(max_length=20)
+    updated = models.DateTimeField(auto_now_add=True)
+    objects = BikeRackManager()
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
