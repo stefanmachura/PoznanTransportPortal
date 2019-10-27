@@ -26,6 +26,7 @@ def timetable(request):
     # TODO: unit tests
     # TODO: prepare mock content
     # TODO: Error handling
+    # TODO: db cleaning of old departures
 
     error_message, departures = Departure.objects.get_departures(stop_of_departures)
     family_name = Stop.objects.filter(family=stop_of_departures)[0]

@@ -19,3 +19,11 @@ class StopModelTests(TestCase):
 
     def test_location_calculation(self):
         self.assertEqual((15, 15), Stop.objects.get_location_of_stop_family('FRRY'))
+
+    def test_search_by_family(self):
+        result = Stop.objects.find_by_family("frry").count()
+        self.assertEqual(result, 2)
+
+    def search_by_name_or_id(self):
+        result = Stop.objects.find_by_name_or_id("rat")
+        self.assertEqual(result.given_id, 'FRRY61')
