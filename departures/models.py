@@ -32,7 +32,7 @@ class DepartureManager(models.Manager):
                         timestamp = datetime.datetime.strptime(time, "%d.%m.%Y - %H:%M")
 
                         # when the timetable goes over midnight, the 'when' in API changes to next day, and we need to add a day to the departure timestamp
-                        if today != when:
+                        if today[0] != when:
                             timestamp += datetime.timedelta(days=1)
 
                         # making the timestamp tz aware so that timedelta can be calculated
