@@ -7,7 +7,7 @@ import pytz
 
 
 class DepartureManager(models.Manager):
-    def add_departures(self, stop_id):
+    def save_departures_to_db(self, stop_id):
         url = "http://www.poznan.pl/mim/komunikacja/service.html?stop_id=" + stop_id
         r = requests.get(url)
         r.encoding = "utf-8"
@@ -36,9 +36,10 @@ class DepartureManager(models.Manager):
                             timestamp += datetime.timedelta(days=1)
 
                         # making the timestamp tz aware so that timedelta can be calculated
-                        local_timezone = pytz.timezone('Europe/Warsaw')
-                        timestamp = local_timezone.localize(timestamp)
+                        tz = pytz.timezone('Europe/Warsaw')
+                        timestamp = tz.localize(timestamp)
 
+                        # converting the departure time to utc, this is how it will be stored in the db
                         utc_timestamp = timestamp.astimezone(pytz.utc)
 
                         new_departure = Departure(line=line, headsign=headsign, timestamp=utc_timestamp, stop=Stop.objects.get(given_id=stop_id))
@@ -51,13 +52,13 @@ class DepartureManager(models.Manager):
     def load_departures(self, family):
         stops = [x.given_id for x in Stop.objects.find_by_family(family)]
         for stop in stops:
-            Departure.objects.add_departures(stop)
+            Departure.objects.save_departures_to_db(stop)
         return stops
 
     def get_departures(self, query):
         now = datetime.datetime.utcnow()
-        local_timezone = pytz.timezone('UTC')
-        tz_now = local_timezone.localize(now)
+        tz = pytz.timezone('UTC')
+        tz_now = tz.localize(now)
         result = Departure.objects.filter(timestamp__gte=tz_now).filter(stop__family=query)
         if result.count() == 0:
             self.load_departures(query)
